@@ -1,0 +1,53 @@
+{
+  "name": "@mtbjorn/reagent",
+  "version": "0.0.1",
+  "description": "A collection of UI components",
+  "main": "dist/main.js",
+  "entry": "src/index.js",
+  "scripts": {
+    "build:prod": "webpack --config=webpack.config.prod.js",
+    "build:dev": "webpack --config=webpack.config.dev.js",
+    "build": "npm run build:dev",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "npm run build:prod"
+  },
+  "keywords": [
+    "react",
+    "jsx",
+    "render",
+    "component"
+  ],
+  "files": [
+    "/dist"
+  ],
+  "homepage": "https://github.com/CAndRyan/MTBjorn.Reagent",
+  "bugs": {
+    "url": "https://github.com/CAndRyan/MTBjorn.Reagent/issues",
+    "email": "mtbjorn41@outlook.com"
+  },
+  "author": "@CAndRyan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CAndRyan/MTBjorn.Reagent.git"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.16.12",
+    "@babel/plugin-transform-runtime": "^7.16.10",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "babel-loader": "^8.2.3",
+    "babel-plugin-jsx-pragmatic": "^1.0.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "css-loader": "^6.5.1",
+    "sass": "^1.49.0",
+    "sass-loader": "^12.4.0",
+    "source-map-loader": "^3.0.1",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.67.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.16.7"
+  }
+}

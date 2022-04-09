@@ -1,0 +1,5 @@
+const initialize = () => {};
+
+export {
+    initialize
+}
