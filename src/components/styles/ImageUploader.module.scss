@@ -1,0 +1,16 @@
+﻿.imageUpload {
+	overflow: hidden;
+
+	.loadingSpinnerContainer {
+		display: none;
+
+		.loadingSpinner {
+			background-image: url('../../assets/loading-spinner-gear.svg');
+			background-size: cover;
+			height: 24px;
+			width: 24px;
+			display: inline-block;
+			vertical-align: middle;
+		}
+	}
+}

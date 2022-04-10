@@ -1,0 +1,30 @@
+﻿$imgMarginSize: 20px;
+
+.imageGallery {
+	padding-bottom: $imgMarginSize;
+
+	img {
+		/* TODO: draw a picture frame using gradients in the background: https://css-tricks.com/drawing-images-with-css-gradients/ */
+		border: none;
+		margin-top: $imgMarginSize;
+		margin-right: $imgMarginSize;
+		margin-bottom: 0px;
+		margin-left: $imgMarginSize;
+		border-radius: 5%;
+		padding: 10px;
+		box-shadow: 5px 5px 10px #888888;
+		vertical-align: middle;
+		transition: 0.3s;
+		max-height: 200px + $imgMarginSize;
+		max-width: 200px + $imgMarginSize;
+
+		@media (max-width: 500px) {
+			max-height: 130px + $imgMarginSize;
+			max-width: 130px + $imgMarginSize;
+		}
+
+		&:hover {
+			box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+		}
+	}
+}

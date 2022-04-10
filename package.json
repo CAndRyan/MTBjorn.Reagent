@@ -9,7 +9,7 @@
     "build:dev": "webpack --config=webpack.config.dev.js",
     "build": "npm run build:dev",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "npm run build:prod"
+    "prepublishOnly": "npm run build:prod"
   },
   "keywords": [
     "react",
@@ -48,6 +48,8 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "@babel/runtime": "^7.16.7"
+    "@babel/runtime": "^7.16.7",
+    "@mtbjorn/hypotenuse": "^0.0.3",
+    "uuid": "^8.3.2"
   }
 }
