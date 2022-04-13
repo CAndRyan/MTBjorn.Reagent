@@ -9,7 +9,9 @@ module.exports = {
         filename: 'main.js',
         library: 'reagent',
         libraryTarget: 'umd',
-        umdNamedDefine: true
+        umdNamedDefine: true,
+        globalObject: 'this',
+        publicPath: ''
     },
     resolve: {
         extensions: ['', '.js', '.jsx', '.mjs', 'css', 'scss', '.module.css', '.module.scss'],

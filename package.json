@@ -20,6 +20,9 @@
   "files": [
     "/dist"
   ],
+  "exports": {
+    ".": "./dist/*"
+  },
   "homepage": "https://github.com/CAndRyan/MTBjorn.Reagent",
   "bugs": {
     "url": "https://github.com/CAndRyan/MTBjorn.Reagent/issues",

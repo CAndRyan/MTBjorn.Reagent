@@ -1,11 +1,11 @@
-﻿import UploadedImage from './UploadedImage';
+﻿import ImageFrame from './ImageFrame';
 import getConnectedImageGalleryModal from './ImageGalleryModal';
 import { renderElement, replaceElement } from '@mtbjorn/hypotenuse/ui'; // require('@mtbjorn/hypotenuse/dist/ui')
 import styles from './styles/ImageGallery';
 
 const ImageGallery = ({ images, onImageClick }) => (
 	<div className={styles.imageGallery}>
-		{images.map(({ fileId, fileName, url }) => <UploadedImage fileId={fileId} fileName={fileName} url={url} onClickHandler={onImageClick} />) }
+		{images.map(({ fileId, fileName, url }) => <ImageFrame fileId={fileId} fileName={fileName} url={url} onClickHandler={onImageClick} />) }
 	</div>
 );
 
@@ -44,7 +44,7 @@ const getValidImageData = async (initialData) => {
 	return validImageData.reverse(); // Note: return images ordered with last uploaded being first
 };
 
-const getImageGalleryWithChangeHandlers = async (initialData) => {
+const getImageGalleryWithChangeHandlers = async (initialData = []) => {
 	const initialImageData = await getValidImageData(initialData);
 	let [ImageGalleryModal, openModal] = getConnectedImageGalleryModal(initialImageData);
 	let openGalleryModal = ({ target }) => {
