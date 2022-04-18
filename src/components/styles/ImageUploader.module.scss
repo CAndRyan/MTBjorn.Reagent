@@ -4,8 +4,7 @@
 	.loadingSpinnerContainer {
 		display: none;
 
-		.loadingSpinner {
-			background-image: url('../../assets/loading-spinner-gear.svg');
+		img.loadingSpinner {
 			background-size: cover;
 			height: 24px;
 			width: 24px;

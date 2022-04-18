@@ -1,6 +1,6 @@
 ﻿import ImageFrame from './ImageFrame';
 import getConnectedImageGalleryModal from './ImageGalleryModal';
-import { renderElement, replaceElement } from '@mtbjorn/hypotenuse/ui'; // require('@mtbjorn/hypotenuse/dist/ui')
+import { renderElement, replaceElement } from '@mtbjorn/hypotenuse/ui';
 import styles from './styles/ImageGallery';
 
 const ImageGallery = ({ images, onImageClick }) => (
