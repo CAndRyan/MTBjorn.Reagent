@@ -5,6 +5,7 @@
 		display: none;
 
 		img.loadingSpinner {
+			background-image: svg-load('../../assets/loading-spinner-gear.svg');
 			background-size: cover;
 			height: 24px;
 			width: 24px;

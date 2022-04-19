@@ -1,7 +1,6 @@
 ﻿import { v4 as uuidv4 } from 'uuid';
 import { resizeImage } from '@mtbjorn/hypotenuse/utility';
 import styles from './styles/ImageUploader';
-import loadingSpinnerSvg from '../assets/loading-spinner-gear.svg';
 
 const fileIsValidImage = ({ type: mimeType }) => {
 	const [mainFileType, subType] = mimeType.split('/');
@@ -78,7 +77,7 @@ const ImageUploader = ({ title, disabled, handleFileUpload, onUploadFailure = de
 	return (
 		<div class={styles.imageUpload}>
 			<div id={loaderElementId} class={styles.loadingSpinnerContainer}>
-				<img class={styles.loadingSpinner} src={loadingSpinnerSvg} />
+				<div class={styles.loadingSpinner} />
 			</div>
 			<label>
 				Upload image(s):&nbsp;

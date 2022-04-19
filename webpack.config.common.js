@@ -31,17 +31,6 @@ module.exports = {
                 }
             },
             {
-                test: /\.svg$/i,
-                use: [
-                    {
-                        loader: 'svg-url-loader',
-                        options: {
-                            limit: 10000,
-                        }
-                    },
-                ],
-            },
-            {
                 test: /\.s[ac]ss$/i,
                 use: [
                     "style-loader",
@@ -52,7 +41,22 @@ module.exports = {
                             modules: true
                         }
                     },
-                    "sass-loader"
+                    {
+                        loader: "postcss-loader",
+                        options: {
+                            postcssOptions: {
+                                plugins: [
+                                    "postcss-inline-svg"
+                                ],
+                            }
+                        }
+                    },
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            sourceMap: true
+                        }
+                    }
                 ],
                 include: /\.module\.s[ac]ss$/
             },
