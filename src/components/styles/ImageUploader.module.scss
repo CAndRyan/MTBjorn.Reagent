@@ -2,7 +2,8 @@
 	overflow: hidden;
 
 	.loadingSpinnerContainer {
-		display: none;
+		display: inline-block;
+		visibility: hidden;
 
 		div.loadingSpinner {
 			background-image: svg-load('../../assets/loading-spinner-gear.svg');

@@ -29,7 +29,7 @@ const ImageUploader = ({ title, disabled, handleFileUpload, onUploadFailure = de
 	const loaderElementId = uuidv4();
 
 	const handleFileListUpload = async ({ target }) => {
-		document.getElementById(loaderElementId).style.display = 'inline-block';
+		document.getElementById(loaderElementId).style.visibility = 'visible';
 
 		try {
 			const fileList = target.files;
@@ -70,7 +70,7 @@ const ImageUploader = ({ title, disabled, handleFileUpload, onUploadFailure = de
 			defaultUploadFailureHandler([error]);
 		}
 		finally {
-			document.getElementById(loaderElementId).style.display = 'none';
+			document.getElementById(loaderElementId).style.visibility = 'hidden';
 		}
 	};
 
