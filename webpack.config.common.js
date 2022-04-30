@@ -15,7 +15,7 @@ module.exports = {
     resolve: {
         extensions: ['', '.js', '.jsx', '.mjs', 'css', 'scss', '.module.css', '.module.scss'],
         alias: {
-            build: path.resolve(__dirname, 'build/')
+            hypotenuse: path.resolve(__dirname, 'node_modules/@mtbjorn/hypotenuse/dist/')
         }
     },
     module: {
