@@ -5,6 +5,8 @@
   "main": "dist/main.js",
   "entry": "src/index.js",
   "scripts": {
+    "start:ui": "webpack serve --config=webpack.config.dev.ui.js --port 3032",
+    "build:dev:ui": "webpack --config=webpack.config.dev.ui.js",
     "build:prod": "webpack --config=webpack.config.prod.js",
     "build:dev": "webpack --config=webpack.config.dev.js",
     "build": "npm run build:dev",
@@ -43,6 +45,7 @@
     "babel-plugin-jsx-pragmatic": "^1.0.2",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.5.1",
+    "html-webpack-plugin": "^5.5.0",
     "postcss": "^8.4.12",
     "postcss-inline-svg": "^5.0.0",
     "postcss-loader": "^6.2.1",
@@ -51,7 +54,8 @@
     "source-map-loader": "^3.0.1",
     "style-loader": "^3.3.1",
     "webpack": "^5.67.0",
-    "webpack-cli": "^4.9.2"
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.8.1"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",

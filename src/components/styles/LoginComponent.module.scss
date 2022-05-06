@@ -1,0 +1,57 @@
+﻿$buttonHeight: 24px;
+
+.loginForm {
+	width: 100%;
+
+	table {
+		width: 100%;
+
+		tr {
+			&:first-child {
+				margin-top: 0px;
+			}
+
+			td:first-child {
+				font-weight: bold;
+				text-align: right;
+				width: 80px;
+		
+				&::after {
+					content: ':';
+				}
+			}
+
+			.inputColumn {
+				padding-right: 13px;
+
+				input {
+					width: 100%;
+					margin-top: 10px;
+					margin-bottom: 10px;
+					margin-left: 10px;
+
+					&:required:valid {
+						background-color: #00ff0012; // lime with low opacity
+					}
+
+					&:required:invalid {
+						background-color: #ff000012; // red with low opacity
+					}
+					
+					&:optional {
+						background-color: #8080801c; // grey with low opacity
+					}
+				}
+			}
+		}
+	}
+
+	.buttonRow {
+		height: $buttonHeight;
+
+		button {
+			height: $buttonHeight;
+			float: right;
+		}
+	}
+}
