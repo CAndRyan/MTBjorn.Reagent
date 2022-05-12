@@ -14,6 +14,8 @@ const getOnFormSubmitHandler = (onSubmit, onAfterSuccess) => async (event) => {
 	const formData = new FormData(target);
 	const userDetails = getUserDetailsFromFormData(formData);
 
+	event.preventDefault();
+
 	try {
 		await onSubmit(userDetails);
 		target.reset();
@@ -23,8 +25,7 @@ const getOnFormSubmitHandler = (onSubmit, onAfterSuccess) => async (event) => {
 		console.error(error);
 		// TODO: display error message
 	}
-
-	event.preventDefault();
+    
 	return false;
 };
 
