@@ -1,3 +1,4 @@
+import { ReactiveComponent } from '@mtbjorn/hypotenuse';
 import styles from './styles/LoginComponent';
 
 const getUserDetailsFromFormData = (formData) => {
@@ -31,7 +32,7 @@ const getOnFormSubmitHandler = (onSubmit, onAfterSuccess) => async (event) => {
 
 const noOpAsync = () => Promise.resolve();
 
-const LoginComponent = ({ onSubmit, onAfterSuccess = noOpAsync }) => (
+const LoginComponentBase = ({ onSubmit, onAfterSuccess = noOpAsync }) => (
     <form className={styles.loginForm} onSubmit={getOnFormSubmitHandler(onSubmit, onAfterSuccess)} autocomplete="off">
         <table>
             <tbody>
@@ -51,5 +52,27 @@ const LoginComponent = ({ onSubmit, onAfterSuccess = noOpAsync }) => (
         </div>
     </form>
 );
+
+const LoginComponent = ({ onSubmit, onAfterSuccess = noOpAsync, getCachedCredentials = noOpAsync }) => {
+    let cachedCredentials = null;
+    const onBeforeElementRender = async () => {
+        console.log('h ---- before');
+        cachedCredentials = await getCachedCredentials();
+    }
+    const onAfterElementRender = async () => {
+        console.log('TESTETETTE');
+        if (!cachedCredentials)
+            return;
+
+        await onSubmit(cachedCredentials);
+        await onAfterSuccess(); // TODO: use explicit error handling or is the form submit failure sufficient?
+    };
+
+    return (
+        <ReactiveComponent onBeforeElementRender={onBeforeElementRender} onAfterElementRender={onAfterElementRender}>
+            <LoginComponentBase onSubmit={onSubmit} onAfterSuccess={onAfterSuccess} />
+        </ReactiveComponent>
+    );
+};
 
 export default LoginComponent;
