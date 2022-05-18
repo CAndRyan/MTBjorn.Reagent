@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@mtbjorn/hypotenuse": "^0.0.4",
+    "@mtbjorn/hypotenuse": "^0.0.5",
     "uuid": "^8.3.2"
   }
 }

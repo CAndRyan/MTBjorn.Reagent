@@ -1,4 +1,4 @@
-import { ReactiveComponent } from '@mtbjorn/hypotenuse';
+import { ReactiveComponent } from '@mtbjorn/hypotenuse/ui';
 import styles from './styles/LoginComponent';
 
 const getUserDetailsFromFormData = (formData) => {
@@ -56,11 +56,9 @@ const LoginComponentBase = ({ onSubmit, onAfterSuccess = noOpAsync }) => (
 const LoginComponent = ({ onSubmit, onAfterSuccess = noOpAsync, getCachedCredentials = noOpAsync }) => {
     let cachedCredentials = null;
     const onBeforeElementRender = async () => {
-        console.log('h ---- before');
         cachedCredentials = await getCachedCredentials();
-    }
+    };
     const onAfterElementRender = async () => {
-        console.log('TESTETETTE');
         if (!cachedCredentials)
             return;
 
