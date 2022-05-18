@@ -1,6 +1,6 @@
 {
   "name": "@mtbjorn/reagent",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A collection of UI components",
   "main": "dist/main.js",
   "entry": "src/index.js",
