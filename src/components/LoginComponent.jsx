@@ -18,9 +18,9 @@ const getOnFormSubmitHandler = (onSubmit, onAfterSuccess) => async (event) => {
 	event.preventDefault();
 
 	try {
-		await onSubmit(userDetails);
+		const submitResults = await onSubmit(userDetails);
 		target.reset();
-        await onAfterSuccess();
+        await onAfterSuccess(submitResults);
 		// TODO: display success message
 	} catch (error) {
 		console.error(error);
@@ -62,8 +62,8 @@ const LoginComponent = ({ onSubmit, onAfterSuccess = noOpAsync, getCachedCredent
         if (!cachedCredentials)
             return;
 
-        await onSubmit(cachedCredentials);
-        await onAfterSuccess(); // TODO: use explicit error handling or is the form submit failure sufficient?
+        const submitResponse = await onSubmit(cachedCredentials);
+        await onAfterSuccess(submitResponse); // TODO: use explicit error handling or is the form submit failure sufficient?
     };
 
     return (
