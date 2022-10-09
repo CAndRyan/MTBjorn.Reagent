@@ -1,14 +1,46 @@
-﻿import ImageFrame from './ImageFrame';
+﻿import { v4 as uuidv4 } from 'uuid';
+import ImageFrame from './ImageFrame';
 import getConnectedImageGalleryModal from './ImageGalleryModal';
 import { renderElement, replaceElement } from '@mtbjorn/hypotenuse/ui';
 import styles from './styles/ImageGallery';
 
-const ImageGallery = ({ title, images, onImageClick }) => (
-	<div className={styles.imageGallery}>
-		<h2>Selected Folder: {title}</h2>
+const ImageGalleryPanel = ({ id, images, onImageClick }) => {
+	<div id={id}>
 		{images.map(({ fileId, fileName, url }) => <ImageFrame fileId={fileId} fileName={fileName} url={url} onClickHandler={onImageClick} />) }
 	</div>
-);
+};
+
+const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onImageClick, onFolderChange = () => Promise.resolve([]) }) => {
+	const galleryPanelId = uuidv4();
+	const folderSelectId = uuidv4();
+	const titleElementId = uuidv4();
+	const refreshGalleryPanel = async (updatedImages) => {
+		const galleryPanelElement = document.getElementById(galleryPanelId);
+		await replaceElement(galleryPanelElement, <ImageGalleryPanel id={galleryPanelId} images={updatedImages} onImageClick={onImageClick} />)
+	};
+	const onFolderSelect = async ({ target }) => {
+		const folderName = target.value;
+		const updatedImages = await onFolderChange(folderName);
+		await refreshGalleryPanel(updatedImages);
+
+		const titleElement = document.getElementById(titleElementId);
+		const folderSelectElement = document.getElementById(folderSelectId);
+		titleElement.innerText = folderName ? `Selected Folder: ${folderName}` : 'Images';
+		folderSelectElement.className = folderName ? '' : styles.hidden;
+	}
+	
+	return (
+		<div className={styles.imageGallery}>
+			<h2 id={titleElementId}>{initialSelectedFolder ? `Selected Folder: ${initialSelectedFolder}` : 'Images'}</h2>
+			<div id={folderSelectId} className={initialSelectedFolder ? '' : styles.hidden}>
+				<select onChange={onFolderSelect} selectedIndex={folders.findIndex((folder) => folder === initialSelectedFolder)}>
+					{folders.map((folderName) => <option value={folderName}>{folderName}</option>)}
+				</select>
+			</div>
+			<ImageGalleryPanel id={galleryPanelId} images={images} onImageClick={onImageClick} />
+		</div>
+	);
+};
 
 // TODO: add description of async component structure to README -- the idea is to defer rendering of any component defined as an async function.
 // I believe the custom rendering code could be updated to detect such components & itself use async/await to trigger the provided render functions at the appropriate times.
@@ -55,52 +87,66 @@ const getFolderDataWithLoaders = (initialFolderData) => initialFolderData.reduce
 	}
 }), {});
 
-const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initialSelectedFolder) => {
+const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initialSelectedFolder = null, onFolderStateChange = () => Promise.resolve()) => {
 	let folderImageLoadersMap = getFolderDataWithLoaders(initialFolderData);
-	let selectedFolder = initialSelectedFolder || initialFolderData.length === 0 ? initialSelectedFolder : Object.keys(folderImageLoadersMap)[0]
+	let selectedFolder = initialSelectedFolder;
+	let selectedFolderImageData = [];
 
-	const initialSelectedFolderData = folderImageLoadersMap[selectedFolder];
-	if (initialSelectedFolderData) {
-		initialSelectedFolderData.images = await initialSelectedFolderData.getImages();
-	}
+	const loadImagesForSelectedFolder = async () => {
+		const selectedFolderData = selectedFolder ? folderImageLoadersMap[selectedFolder] : Object.values(folderImageLoadersMap)[0];
+		if (selectedFolderData && selectedFolderData.images.length === 0) {
+			selectedFolderData.images = await selectedFolderData.getImages();
+		}
+		selectedFolderImageData = selectedFolderData ? selectedFolderData.images : [];
+	};
 
-	const initialImageData = initialSelectedFolderData ? initialSelectedFolderData.images : [];
-	let [ImageGalleryModal, openModal] = getConnectedImageGalleryModal(initialImageData);
+	await loadImagesForSelectedFolder();
+
+	let [ImageGalleryModal, openModal] = getConnectedImageGalleryModal(selectedFolderImageData);
 	let openGalleryModal = ({ target }) => {
 		openModal(target.id);
 	};
-	const galleryComponent = <ImageGallery images={initialImageData} onImageClick={openGalleryModal} />;
+	const galleryComponent = <ImageGallery images={selectedFolderImageData} onImageClick={openGalleryModal} />;
 
 	let galleryElement;
 	let modalElement;
 
+	// Returns a new set of images, letting the gallery element refresh itself
+	const onFolderChange = async (latestSelectedFolder) => {
+		if (latestSelectedFolder === selectedFolder) return;
+
+		selectedFolder = latestSelectedFolder;
+		const updatedImages = await loadImagesForSelectedFolder();
+		await onFolderStateChange(selectedFolder);
+
+		return updatedImages;
+	};
+
 	const onComponentRender = async (domElement) => {
 		galleryElement = domElement;
-		modalElement = await renderElement(<ImageGalleryModal images={initialImageData} />, (el) => {
+		modalElement = await renderElement(<ImageGalleryModal images={selectedFolderImageData} />, (el) => {
 			const bodyElement = document.getElementsByTagName('body')[0];
 			bodyElement.append(el);
 		});
 	};
 
-	// Only refresh image data if not a folder changes (presumed data change)
-	const onDataChange = async (latestFolderData, latestSelectedFolder) => {
-		if (latestSelectedFolder === selectedFolder) {
-			folderImageLoadersMap = getFolderDataWithLoaders(latestFolderData);
-		}
-		selectedFolder = latestSelectedFolder || latestFolderData.length === 0 ? latestSelectedFolder : Object.keys(folderImageLoadersMap)[0]
+	const onDataChange = async (latestFolderData) => {
+		// TODO: implement comparison logic to diff folder data changes, only reloading those folders that changed
+		folderImageLoadersMap = getFolderDataWithLoaders(latestFolderData);
 		
-		const latestSelectedFolderData = folderImageLoadersMap[selectedFolder];
-		if (latestSelectedFolderData && latestSelectedFolderData.images.length === 0) {
-			latestSelectedFolderData.images = await latestSelectedFolderData.getImages();
-		}
-		const latestImageData = latestSelectedFolderData ? latestSelectedFolderData.images : [];
+		await loadImagesForSelectedFolder();
 
 		[ImageGalleryModal, openModal] = getConnectedImageGalleryModal(latestImageData);
 		openGalleryModal = ({ target }) => {
 			openModal(target.id);
 		};
 
-		galleryElement = await replaceElement(galleryElement, <ImageGallery title={selectedFolder} images={latestImageData} onImageClick={openGalleryModal} />);
+		galleryElement = await replaceElement(galleryElement, <ImageGallery
+			initialSelectedFolder={selectedFolder}
+			images={latestImageData}
+			onFolderChange={onFolderChange}
+			onImageClick={openGalleryModal}
+		/>);
 		modalElement = await replaceElement(modalElement, <ImageGalleryModal images={latestImageData} />);
 	};
 
