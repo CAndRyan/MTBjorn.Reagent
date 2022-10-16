@@ -4,16 +4,17 @@ import getConnectedImageGalleryModal from './ImageGalleryModal';
 import { renderElement, replaceElement } from '@mtbjorn/hypotenuse/ui';
 import styles from './styles/ImageGallery';
 
-const ImageGalleryPanel = ({ id, images, onImageClick }) => {
+const ImageGalleryPanel = ({ id, images, onImageClick }) => (
 	<div id={id}>
 		{images.map(({ fileId, fileName, url }) => <ImageFrame fileId={fileId} fileName={fileName} url={url} onClickHandler={onImageClick} />) }
 	</div>
-};
+);
 
 const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onImageClick, onFolderChange = () => Promise.resolve([]) }) => {
 	const galleryPanelId = uuidv4();
 	const folderSelectId = uuidv4();
 	const titleElementId = uuidv4();
+
 	const refreshGalleryPanel = async (updatedImages) => {
 		const galleryPanelElement = document.getElementById(galleryPanelId);
 		await replaceElement(galleryPanelElement, <ImageGalleryPanel id={galleryPanelId} images={updatedImages} onImageClick={onImageClick} />)
@@ -32,7 +33,7 @@ const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onIm
 	return (
 		<div className={styles.imageGallery}>
 			<h2 id={titleElementId}>{initialSelectedFolder ? `Selected Folder: ${initialSelectedFolder}` : 'Images'}</h2>
-			<div id={folderSelectId} className={initialSelectedFolder ? '' : styles.hidden}>
+			<div id={folderSelectId} className={folders.length > 1 ? '' : styles.hidden}>
 				<select onChange={onFolderSelect} selectedIndex={folders.findIndex((folder) => folder === initialSelectedFolder)}>
 					{folders.map((folderName) => <option value={folderName}>{folderName}</option>)}
 				</select>
@@ -46,7 +47,9 @@ const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onIm
 // I believe the custom rendering code could be updated to detect such components & itself use async/await to trigger the provided render functions at the appropriate times.
 // It may not be necessary to update the JSX preprocessor as well...
 // The entire component may need to be async if we can't get something to handle coordination between the component renderer & preprocesser
-const getValidImageDataDeferred = (initialImageData) => async () => {
+const getValidImageDataDeferred = (initialImageData = []) => async () => {
+	if (!initialImageData) return [];
+
 	const validImageDataLoaders = initialImageData.map(({ fileId, fileName, url }) => async () => {
 		var actualFileName = fileName ? fileName : fileId;
 
@@ -87,68 +90,73 @@ const getFolderDataWithLoaders = (initialFolderData) => initialFolderData.reduce
 	}
 }), {});
 
-const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initialSelectedFolder = null, onFolderStateChange = () => Promise.resolve()) => {
+const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initialSelectedFolder = null) => {
 	let folderImageLoadersMap = getFolderDataWithLoaders(initialFolderData);
-	let selectedFolder = initialSelectedFolder;
-	let selectedFolderImageData = [];
+	let folderNames = Object.keys(folderImageLoadersMap);
+	let selectedFolder = initialSelectedFolder ? initialSelectedFolder : Object.keys(folderImageLoadersMap)[0];
 
-	const loadImagesForSelectedFolder = async () => {
-		const selectedFolderData = selectedFolder ? folderImageLoadersMap[selectedFolder] : Object.values(folderImageLoadersMap)[0];
-		if (selectedFolderData && selectedFolderData.images.length === 0) {
+	const loadImagesForSelectedFolder = async (folder) => {
+		const selectedFolderData = folder ? folderImageLoadersMap[folder] : Object.values(folderImageLoadersMap)[0];
+		if (!selectedFolderData) return [];
+
+		if (selectedFolderData.images.length === 0) {
 			selectedFolderData.images = await selectedFolderData.getImages();
 		}
-		selectedFolderImageData = selectedFolderData ? selectedFolderData.images : [];
+
+		return selectedFolderData.images;
 	};
 
-	await loadImagesForSelectedFolder();
-
-	let [ImageGalleryModal, openModal] = getConnectedImageGalleryModal(selectedFolderImageData);
-	let openGalleryModal = ({ target }) => {
-		openModal(target.id);
+	const [ImageGalleryModal, openModal] = getConnectedImageGalleryModal();
+	const openGalleryModal = async ({ target }) => {
+		const currentImages = await loadImagesForSelectedFolder(selectedFolder);
+		openModal(currentImages, target.id);
 	};
-	const galleryComponent = <ImageGallery images={selectedFolderImageData} onImageClick={openGalleryModal} />;
 
 	let galleryElement;
 	let modalElement;
 
-	// Returns a new set of images, letting the gallery element refresh itself
-	const onFolderChange = async (latestSelectedFolder) => {
-		if (latestSelectedFolder === selectedFolder) return;
-
-		selectedFolder = latestSelectedFolder;
-		const updatedImages = await loadImagesForSelectedFolder();
-		await onFolderStateChange(selectedFolder);
-
-		return updatedImages;
-	};
-
 	const onComponentRender = async (domElement) => {
 		galleryElement = domElement;
-		modalElement = await renderElement(<ImageGalleryModal images={selectedFolderImageData} />, (el) => {
+		modalElement = await renderElement(<ImageGalleryModal foldersData={folderImageLoadersMap} />, (el) => {
 			const bodyElement = document.getElementsByTagName('body')[0];
 			bodyElement.append(el);
 		});
 	};
 
+	// Returns a new set of images, letting the gallery element refresh itself
+	const onFolderChange = async (latestSelectedFolder) => {
+		if (latestSelectedFolder === selectedFolder) return;
+
+		selectedFolder = latestSelectedFolder ? latestSelectedFolder : Object.keys(folderImageLoadersMap)[0];
+		const updatedImages = await loadImagesForSelectedFolder(selectedFolder);
+
+		return updatedImages;
+	};
+
 	const onDataChange = async (latestFolderData) => {
 		// TODO: implement comparison logic to diff folder data changes, only reloading those folders that changed
 		folderImageLoadersMap = getFolderDataWithLoaders(latestFolderData);
+		folderNames = Object.keys(folderImageLoadersMap);
 		
-		await loadImagesForSelectedFolder();
-
-		[ImageGalleryModal, openModal] = getConnectedImageGalleryModal(latestImageData);
-		openGalleryModal = ({ target }) => {
-			openModal(target.id);
-		};
+		const updatedImages = await loadImagesForSelectedFolder(latestSelectedFolder);
 
 		galleryElement = await replaceElement(galleryElement, <ImageGallery
 			initialSelectedFolder={selectedFolder}
-			images={latestImageData}
+			images={updatedImages}
+			folders={folderNames}
 			onFolderChange={onFolderChange}
 			onImageClick={openGalleryModal}
 		/>);
-		modalElement = await replaceElement(modalElement, <ImageGalleryModal images={latestImageData} />);
 	};
+
+	const currentImageData = await loadImagesForSelectedFolder(initialSelectedFolder);
+	const galleryComponent = <ImageGallery
+		initialSelectedFolder={selectedFolder} 
+		images={currentImageData}
+		folders={folderNames}
+		onFolderChange={onFolderChange}
+		onImageClick={openGalleryModal}
+	/>;
 
 	return [galleryComponent, onComponentRender, onDataChange];
 };

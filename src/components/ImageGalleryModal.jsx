@@ -1,6 +1,7 @@
 ﻿import styles from './styles/ImageGalleryModal';
 
-const getConnectedImageGalleryModal = (images) => {
+const getConnectedImageGalleryModal = () => {
+	let images = [];
 	let activeImageIndex = -1;
 	let domCache = null;
 
@@ -31,7 +32,8 @@ const getConnectedImageGalleryModal = (images) => {
 		imageNumberElement.innerText = `${activeImageIndex + 1} / ${images.length}`;
 	};
 
-	const openModal = (activeImageId) => {
+	const openModal = (updatedImages, activeImageId) => {
+		images = updatedImages;
 		activeImageIndex = images.findIndex((image) => image.fileId === activeImageId);
 		if (activeImageIndex === -1)
 			throw `Unable to find image in gallery (ID='${activeImageId}')`;
