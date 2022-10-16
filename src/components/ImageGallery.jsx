@@ -24,19 +24,19 @@ const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onIm
 		const updatedImages = await onFolderChange(folderName);
 		await refreshGalleryPanel(updatedImages);
 
-		const titleElement = document.getElementById(titleElementId);
 		const folderSelectElement = document.getElementById(folderSelectId);
-		titleElement.innerText = folderName ? `Selected Folder: ${folderName}` : 'Images';
 		folderSelectElement.className = folderName ? '' : styles.hidden;
 	}
 	
 	return (
 		<div className={styles.imageGallery}>
-			<h2 id={titleElementId}>{initialSelectedFolder ? `Selected Folder: ${initialSelectedFolder}` : 'Images'}</h2>
-			<div id={folderSelectId} className={folders.length > 1 ? '' : styles.hidden}>
-				<select onChange={onFolderSelect} selectedIndex={folders.findIndex((folder) => folder === initialSelectedFolder)}>
-					{folders.map((folderName) => <option value={folderName}>{folderName}</option>)}
-				</select>
+			<div class={styles.folderTitle}>
+				<h2 id={titleElementId}>Select folder:</h2>&nbsp;
+				<div id={folderSelectId} className={folders.length > 1 ? styles.selectContainer : `${styles.selectContainer} ${styles.hidden}`}>
+					<select onChange={onFolderSelect} selectedIndex={folders.findIndex((folder) => folder === initialSelectedFolder)}>
+						{folders.map((folderName) => <option value={folderName}>{folderName}</option>)}
+					</select>
+				</div>
 			</div>
 			<ImageGalleryPanel id={galleryPanelId} images={images} onImageClick={onImageClick} />
 		</div>
