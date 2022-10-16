@@ -10,8 +10,8 @@ A collection of UI components
     import { getImageGalleryWithChangeHandlers } from '@mtbjorn/reagent`;
     import { renderElementAsAppend } from '@mtbjorn/hypotenuse`;
 
-    const initialData = []; // array of objects -> { fileId, fileName, url }
-    const [galleryComponent, onComponentRender, onDataChange] = getImageGalleryWithChangeHandlers(initialData);
+    const initialFolderData = []; // an array of objects -> { folder, images }, with images being an array of objects -> { fileId, fileName, url }
+    const [galleryComponent, onComponentRender, onDataChange] = getImageGalleryWithChangeHandlers(initialFolderData, 'initialSelectedFolder');
 
     const domElement = renderElementAsAppend(galleryComponent, document.getElementById('app-container'));
     onComponentRender(domElement);
@@ -20,7 +20,7 @@ A collection of UI components
     onDataChange(newImages);
     ````
 
-    * `initialData` is an optional argument, an array of objects (`{fileId, fileName, url}`) for each image to display within the gallery
+    * `initialFolderData` is an optional argument, an array of objects (`{folder, images}`), where images is an array of objects (`{fileId, fileName, url}`) for each image to display within the gallery
         * `fileId` is a **string** identifier, *currently only used as the `id` attribute of each generated `<ImageFrame />` component*
         * `fileName` is a **string**, *currently used as the `alt` & `title` attributes of each generated `<ImageFrame />` component*
         * `url` is any data url valid for an `<img>` element's `src` attribute
@@ -29,6 +29,7 @@ A collection of UI components
         * A reference to the rendered dom element should be provided as the sole argument
         * This `async` function initializes the `<ImageGallery>`, mainly preparing the associated `<ImageGalleryModal>`
     * The consumer may refresh the `<ImageGallery>` with a new array of image data by providing said data to the `onDataChange` function
+    * Switching between folders is handled within the gallery component itself
 
 * Get an image uploading component
 
