@@ -137,8 +137,9 @@ const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initial
 		// TODO: implement comparison logic to diff folder data changes, only reloading those folders that changed
 		folderImageLoadersMap = getFolderDataWithLoaders(latestFolderData);
 		folderNames = Object.keys(folderImageLoadersMap);
+		if (!folderNames.includes(selectedFolder)) selectedFolder = Object.keys(folderImageLoadersMap)[0];
 		
-		const updatedImages = await loadImagesForSelectedFolder(latestSelectedFolder);
+		const updatedImages = await loadImagesForSelectedFolder(selectedFolder);
 
 		galleryElement = await replaceElement(galleryElement, <ImageGallery
 			initialSelectedFolder={selectedFolder}
