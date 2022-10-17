@@ -34,7 +34,7 @@ const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onIm
 				<h2 id={titleElementId}>Select folder:</h2>&nbsp;
 				<div id={folderSelectId} className={folders.length > 1 ? styles.selectContainer : `${styles.selectContainer} ${styles.hidden}`}>
 					<select onChange={onFolderSelect} selectedIndex={folders.findIndex((folder) => folder === initialSelectedFolder)}>
-						{folders.map((folderName) => <option value={folderName}>{folderName}</option>)}
+						{folders.map(({ folder, folderName }) => <option value={folder}>{folderName}</option>)}
 					</select>
 				</div>
 			</div>
@@ -47,7 +47,7 @@ const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onIm
 // I believe the custom rendering code could be updated to detect such components & itself use async/await to trigger the provided render functions at the appropriate times.
 // It may not be necessary to update the JSX preprocessor as well...
 // The entire component may need to be async if we can't get something to handle coordination between the component renderer & preprocesser
-const getValidImageDataDeferred = (initialImageData = []) => async () => {
+const getValidImageDataDeferred = (initialImageData = [], inReverseOrder = false) => async () => {
 	if (!initialImageData) return [];
 
 	const validImageDataLoaders = initialImageData.map(({ fileId, fileName, url }) => async () => {
@@ -79,20 +79,29 @@ const getValidImageDataDeferred = (initialImageData = []) => async () => {
 	});
 	const validImageData = (await Promise.all(validImageDataLoaders.map(promiseLoad => promiseLoad()))).filter((imageData) => imageData !== null);
 
-	return validImageData.reverse(); // Note: return images ordered with last uploaded being first
+	if (inReverseOrder) return validImageData.reverse(); // Note: return images ordered with last uploaded being first
+
+	return validImageData;
 };
 
-const getFolderDataWithLoaders = (initialFolderData) => initialFolderData.reduce((aggregate, { folder, images }) => ({
-	...aggregate,
-	[folder]: {
-		getImages: getValidImageDataDeferred(images),
-		images: []
-	}
-}), {});
+const getFolderDataWithLoaders = (initialFolderData) => {
+	const folderImageLoadersMap = initialFolderData.reduce((aggregate, { folder, images, displayMostRecentFirst }) => ({
+		...aggregate,
+		[folder]: {
+			getImages: getValidImageDataDeferred(images, displayMostRecentFirst),
+			images: []
+		}
+	}), {});
+	const folders = initialFolderData.map(({ folder, folderName }) => ({
+		folder,
+		folderName: folderName ? folderName : folder
+	}));
+
+	return [folderImageLoadersMap, folders];
+};
 
 const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initialSelectedFolder = null) => {
-	let folderImageLoadersMap = getFolderDataWithLoaders(initialFolderData);
-	let folderNames = Object.keys(folderImageLoadersMap);
+	let [ folderImageLoadersMap, folders ] = getFolderDataWithLoaders(initialFolderData);
 	let selectedFolder = initialSelectedFolder ? initialSelectedFolder : Object.keys(folderImageLoadersMap)[0];
 
 	const loadImagesForSelectedFolder = async (folder) => {
@@ -113,11 +122,10 @@ const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initial
 	};
 
 	let galleryElement;
-	let modalElement;
 
 	const onComponentRender = async (domElement) => {
 		galleryElement = domElement;
-		modalElement = await renderElement(<ImageGalleryModal foldersData={folderImageLoadersMap} />, (el) => {
+		await renderElement(<ImageGalleryModal foldersData={folderImageLoadersMap} />, (el) => {
 			const bodyElement = document.getElementsByTagName('body')[0];
 			bodyElement.append(el);
 		});
@@ -135,16 +143,15 @@ const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initial
 
 	const onDataChange = async (latestFolderData) => {
 		// TODO: implement comparison logic to diff folder data changes, only reloading those folders that changed
-		folderImageLoadersMap = getFolderDataWithLoaders(latestFolderData);
-		folderNames = Object.keys(folderImageLoadersMap);
-		if (!folderNames.includes(selectedFolder)) selectedFolder = Object.keys(folderImageLoadersMap)[0];
+		[ folderImageLoadersMap, folders ] = getFolderDataWithLoaders(latestFolderData);
+		if (!folders.find(({ folder }) => folder === selectedFolder)) selectedFolder = Object.keys(folderImageLoadersMap)[0];
 		
 		const updatedImages = await loadImagesForSelectedFolder(selectedFolder);
 
 		galleryElement = await replaceElement(galleryElement, <ImageGallery
 			initialSelectedFolder={selectedFolder}
 			images={updatedImages}
-			folders={folderNames}
+			folders={folders}
 			onFolderChange={onFolderChange}
 			onImageClick={openGalleryModal}
 		/>);
@@ -154,7 +161,7 @@ const getImageGalleryWithChangeHandlers = async (initialFolderData = [], initial
 	const galleryComponent = <ImageGallery
 		initialSelectedFolder={selectedFolder} 
 		images={currentImageData}
-		folders={folderNames}
+		folders={folders}
 		onFolderChange={onFolderChange}
 		onImageClick={openGalleryModal}
 	/>;
