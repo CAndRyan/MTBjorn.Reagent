@@ -27,13 +27,14 @@ const ImageGallery = ({ initialSelectedFolder = null, images, folders = [], onIm
 		const folderSelectElement = document.getElementById(folderSelectId);
 		folderSelectElement.className = folderName ? '' : styles.hidden;
 	}
+	const initialSelectedFolderIndex = folders.findIndex(({ folder }) => folder === initialSelectedFolder);
 	
 	return (
 		<div className={styles.imageGallery}>
 			<div class={styles.folderTitle}>
 				<h2 id={titleElementId}>Select folder:</h2>&nbsp;
 				<div id={folderSelectId} className={folders.length > 1 ? styles.selectContainer : `${styles.selectContainer} ${styles.hidden}`}>
-					<select onChange={onFolderSelect} selectedIndex={folders.findIndex((folder) => folder === initialSelectedFolder)}>
+					<select onChange={onFolderSelect} selectedIndex={initialSelectedFolderIndex}>
 						{folders.map(({ folder, folderName }) => <option value={folder}>{folderName}</option>)}
 					</select>
 				</div>
